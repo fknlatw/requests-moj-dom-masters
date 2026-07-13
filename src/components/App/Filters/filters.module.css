@@ -1,0 +1,20 @@
+.filtersTable{
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  grid-auto-columns: 1fr;
+  gap: 1rem;
+  background-color: var(--surface-color);
+  padding: 1rem;
+  border-radius: 1rem;
+}
+
+.confirmFiltersButton{
+  grid-column: span 2;
+}
+
+.requestItem{
+  background-color: var(--surface-color);
+  border-radius: 1rem;
+  padding: 1rem;
+}

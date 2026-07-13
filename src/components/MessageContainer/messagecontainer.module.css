@@ -1,0 +1,12 @@
+.messageContainer{
+  background-color: var(--bg-color);
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  padding: 1rem;
+  border-radius: 1rem;
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  z-index: 1;
+}

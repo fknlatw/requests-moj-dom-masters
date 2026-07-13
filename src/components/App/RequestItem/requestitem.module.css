@@ -1,0 +1,28 @@
+.requestItem {
+  padding: 1rem;
+  border-radius: 1rem;
+  gap: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 250px;
+  height: auto;
+  background-color: var(--surface-color);
+}
+
+.requestItemDescription{
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.requestItemPhoto{
+  max-width: 120px;
+}
+
+.requestItemActions{
+  display: flex;
+  gap: 1rem;
+}

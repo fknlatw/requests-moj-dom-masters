@@ -1,0 +1,14 @@
+.addRequestForm{
+  background: var(--surface-color);
+  padding: 1rem;
+  border-radius: 1rem;
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+  flex: 1 0 100%;
+}
+
+.photoPreview{
+  border: 1px solid var(--accent-color);
+  border-radius: 1rem;
+}
