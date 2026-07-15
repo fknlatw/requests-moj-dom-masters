@@ -2,9 +2,13 @@ import { useState, createContext, useRef, useContext, useEffect } from "react";
 import { MessageContext } from "./MessageContext.jsx";
 import { emptyChecker, toRussian } from "../utils/checker.js";
 import { AuthContext } from "./AuthContext.jsx";
-import { fieldsToCheck, defaultRequest, defaultLoadingStates} from "../constants/constants.js";
+import {
+  fieldsToCheck,
+  defaultRequest,
+  defaultLoadingStates,
+} from "../constants/constants.js";
 export const FirebaseContext = createContext();
-
+import imageCompression from "browser-image-compression";
 
 export const FirebaseProvider = ({ children }) => {
   //REACT ПЕРЕМЕННЫЕ
@@ -24,14 +28,16 @@ export const FirebaseProvider = ({ children }) => {
 
   const fetchRequests = async () => {
     try {
-      setLoadingStates({...loadingStates, getRequests: true});
-      const response = await fetch("https://mojdomrequests.linkpc.net/getRequests.php");
+      setLoadingStates({ ...loadingStates, getRequests: true });
+      const response = await fetch(
+        "https://mojdomrequests.linkpc.net/getRequests.php"
+      );
       const data = await response.json();
       setRequests([...data]);
     } catch (error) {
       console.log(error);
     } finally {
-      setLoadingStates({...loadingStates, getRequests: false});
+      setLoadingStates({ ...loadingStates, getRequests: false });
     }
   };
 
@@ -65,17 +71,19 @@ export const FirebaseProvider = ({ children }) => {
     //УДАЛЯЕМ КАРТИНКУ
     setLoadingStates({ ...loadingStates, deleteRequest: true });
     try {
-      const response = await fetch("https://mojdomrequests.linkpc.net/deletePhoto.php", {
-        method: "DELETE",
-        body: JSON.stringify({ id: photoId }),
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        "https://mojdomrequests.linkpc.net/deletePhoto.php",
+        {
+          method: "DELETE",
+          body: JSON.stringify({ id: photoId }),
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
       const data = await response.json();
 
-      
       if (!response.ok) {
         const error = new Error(data.text);
         error.type = data.type;
@@ -90,16 +98,19 @@ export const FirebaseProvider = ({ children }) => {
       return;
     }
 
-    try{
-      const response = await fetch("https://mojdomrequests.linkpc.net/deleteRequest.php", {
-        method: "DELETE",
-        body: JSON.stringify({ id }),
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      
+    try {
+      const response = await fetch(
+        "https://mojdomrequests.linkpc.net/deleteRequest.php",
+        {
+          method: "DELETE",
+          body: JSON.stringify({ id }),
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
       const data = await response.json();
       console.log(data);
 
@@ -141,13 +152,60 @@ export const FirebaseProvider = ({ children }) => {
     }
   };
 
-  const handleFileChange = (e) => {
-    if (e.target.files.length > 0) {
-      setPhoto(e.target.files[0]);
-      setPhotoPreview(URL.createObjectURL(e.target.files[0]));
-    } else {
+  const handleFileChange = async (e) => {
+    const files = e.target.files;
+  
+    if (!files || files.length === 0) {
       setPhoto(null);
-      URL.revokeObjectURL(photoPreview);
+      if (photoPreview) URL.revokeObjectURL(photoPreview);
+      setPhotoPreview(null);
+      return;
+    }
+  
+    const file = files[0];
+  
+    try {
+      // Сброс
+      if (photoPreview) URL.revokeObjectURL(photoPreview);
+      setPhotoPreview(null);
+      setPhoto(null);
+  
+      const compressedFile = await imageCompression(file, {
+        maxSizeMB: 3,
+        maxWidthOrHeight: 1000,
+        quality: 0.9,
+        useWebWorker: true,
+        convertFormat: "image/jpeg",
+      });
+  
+      if (!compressedFile) {
+        setMessage({
+          text: "Не удалось сжать изображение",
+          type: "error",
+        });
+        return;
+      }
+  
+      // ✅ Прямое переименование и установка
+      const baseName = file.name.replace(/\.(png|webp|heic|heif|jpeg|jpg)$/i, "");
+      const finalFile = new File([compressedFile], `${baseName}.jpg`, {
+        type: "image/jpeg",
+      });
+  
+      setPhoto(finalFile);
+      const previewUrl = URL.createObjectURL(finalFile);
+      setPhotoPreview(previewUrl);
+  
+      console.log("Успешно загружено:", finalFile.name, "Размер:", finalFile.size);
+    } catch (error) {
+      console.error("Ошибка в handleFileChange:", error);
+      setMessage({
+        text: "Ошибка при загрузке изображения: " + error.message,
+        type: "error",
+      });
+      
+      if (photoPreview) URL.revokeObjectURL(photoPreview);
+      setPhoto(null);
       setPhotoPreview(null);
     }
   };
@@ -179,14 +237,17 @@ export const FirebaseProvider = ({ children }) => {
     setLoadingStates({ ...loadingStates, editRequest: true });
     if (photo) {
       try {
-        const response = await fetch("https://mojdomrequests.linkpc.net/deletePhoto.php", {
-          method: "DELETE",
-          body: JSON.stringify({ id: editingRequest.photo.id }),
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(
+          "https://mojdomrequests.linkpc.net/deletePhoto.php",
+          {
+            method: "DELETE",
+            body: JSON.stringify({ id: editingRequest.photo.id }),
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
         const data = await response.json();
 
         if (!response.ok) {
@@ -209,13 +270,16 @@ export const FirebaseProvider = ({ children }) => {
       try {
         const formData = new FormData();
         formData.append("photo", photo);
-        const response = await fetch("https://mojdomrequests.linkpc.net/uploadPhoto.php", {
-          method: "POST",
-          body: formData,
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          "https://mojdomrequests.linkpc.net/uploadPhoto.php",
+          {
+            method: "POST",
+            body: formData,
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         const data = await response.json();
 
         if (!response.ok) {
@@ -242,14 +306,18 @@ export const FirebaseProvider = ({ children }) => {
     try {
       const formData = new FormData();
       formData.append("request", JSON.stringify(editRequestFields));
-      const response = await fetch("https://mojdomrequests.linkpc.net/editRequest.php", {
-        method: "POST",
-        body: formData,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        "https://mojdomrequests.linkpc.net/editRequest.php",
+        {
+          method: "POST",
+          body: formData,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const data = await response.json();
+      console.log(data);
       if (!response.ok) {
         const error = new Error(data.text);
         error.type = data.type;
@@ -319,13 +387,16 @@ export const FirebaseProvider = ({ children }) => {
     try {
       const formData = new FormData();
       formData.append("photo", photo);
-      const response = await fetch("https://mojdomrequests.linkpc.net/uploadPhoto.php", {
-        method: "POST",
-        body: formData,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        "https://mojdomrequests.linkpc.net/uploadPhoto.php",
+        {
+          method: "POST",
+          body: formData,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const data = await response.json();
 
       if (!response.ok) {
@@ -352,13 +423,16 @@ export const FirebaseProvider = ({ children }) => {
     try {
       const formData = new FormData();
       formData.append("request", JSON.stringify(newRequestFields));
-      const response = await fetch("https://mojdomrequests.linkpc.net/uploadRequest.php", {
-        method: "POST",
-        body: formData,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        "https://mojdomrequests.linkpc.net/uploadRequest.php",
+        {
+          method: "POST",
+          body: formData,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const data = await response.json();
 
       if (!response.ok) {
@@ -412,7 +486,7 @@ export const FirebaseProvider = ({ children }) => {
     loadingStates,
     toggleEditing,
     editingRequest,
-    cancelEditing
+    cancelEditing,
   };
 
   return (
