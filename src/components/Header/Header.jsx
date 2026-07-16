@@ -10,8 +10,12 @@ export const Header = () => {
   const {logout, user} = useContext(AuthContext);
   return (
     <header className={`${s.header}`}>
-      {user? <Button onClick={logout}><FiLogOut/></Button> :<Link to="/login" ><Button><FiLogIn/></Button></Link>}
+      <div className={s.headerContainer}>
+        {user
+        ? <Button onClick={logout}><FiLogOut/></Button> :<Link to="/login" ><Button><FiLogIn/></Button></Link>}
       
+
+      </div>
     </header>
   )
 }
