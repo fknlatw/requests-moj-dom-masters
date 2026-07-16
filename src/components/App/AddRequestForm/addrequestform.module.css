@@ -11,4 +11,8 @@
 .photoPreview{
   border: 1px solid var(--accent-color);
   border-radius: 1rem;
+  object-fit: contain;
+  max-height: 300px;
+  
+  
 }
