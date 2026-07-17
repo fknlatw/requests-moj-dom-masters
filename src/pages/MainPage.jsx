@@ -9,10 +9,13 @@ import { MessageContainer } from "../components/MessageContainer/MessageContaine
 import { EditRequestForm } from "../components/App/EditRequestForm/EditRequestForm.jsx";
 import { ImSpinner9 } from "react-icons/im";
 import s from "../styles/mainpage.module.css";
-import { Filters } from "../components/App/Filters/Filters.jsx";
 import { FiltersContext } from "../context/FiltersContext.jsx";
+import { AreaCalculator } from "../components/App/AreaCalculator/AreaCalculator.jsx";
+import { Filters } from "../components/App/Filters/Filters.jsx";
 
-export const MainPage = () => {
+
+
+export const MainPage = ({isOpen}) => {
   const { user } = useContext(AuthContext);
   const { isEditing, requests, loadingStates } = useContext(FirebaseContext);
   const { isFiltered, filteredRequests } = useContext(FiltersContext);
@@ -22,8 +25,10 @@ export const MainPage = () => {
       <MainTitle>
         Система управления заявками
       </MainTitle>
-
-      {user && !isEditing && (
+      
+      {isOpen.calculator && <AreaCalculator />}
+      
+      {user && !isEditing && isOpen.addRequest &&(
         <section
           
         >
@@ -43,8 +48,8 @@ export const MainPage = () => {
 
       {message.text && <MessageContainer />}
 
-      <Filters />
-
+      {isOpen.filters && <Filters />}
+      
       <section>
         <h2 className={`title`}>Список заявок</h2>
 
