@@ -455,7 +455,7 @@ export const FirebaseProvider = ({ children }) => {
       return;
     }
     setRequest(defaultRequest);
-    setRequests((prev) => [...prev, newRequestFields]);
+    setRequests((prev) => [newRequestFields, ...prev]);
     setPhoto(null);
     URL.revokeObjectURL(photoPreview);
     setPhotoPreview(null);
