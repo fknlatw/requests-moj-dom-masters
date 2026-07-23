@@ -38,7 +38,9 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
-
+      if(data.type === "error"){
+        return data;
+      }
       saveUser(data);
       return data;
     } catch (error) {

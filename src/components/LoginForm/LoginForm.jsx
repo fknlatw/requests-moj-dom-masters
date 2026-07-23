@@ -30,6 +30,11 @@ export const LoginForm = () => {
       });
       return;
     }
+
+    setMessage({
+      text: "Успешный вход",
+      type: "success"
+    })
     navigate("/");
   };
 
